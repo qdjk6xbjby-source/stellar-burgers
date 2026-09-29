@@ -1,20 +1,18 @@
+﻿import { selectConstructorItems } from '@slices';
 import { IngredientsCategoryUI } from '@ui';
 import { useMemo } from 'react';
+import { useSelector } from 'react-redux';
 
 import type { TIngredientsCategoryProps } from './type';
-import type { TConstructorState, TIngredient } from '@utils-types';
+import type { TIngredient } from '@utils-types';
 
 export const IngredientsCategory = ({
-  title,
-  titleRef,
   ingredients,
   ref,
+  title,
+  titleRef,
 }: TIngredientsCategoryProps): React.JSX.Element => {
-  // TODO: Взять переменную из стора
-  const burgerConstructor: TConstructorState = {
-    bun: null,
-    ingredients: [],
-  };
+  const burgerConstructor = useSelector(selectConstructorItems);
 
   const ingredientsCounters = useMemo(() => {
     const { bun, ingredients } = burgerConstructor;
