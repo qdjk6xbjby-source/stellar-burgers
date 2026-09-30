@@ -1,5 +1,4 @@
 ﻿import {
-  clearConstructor,
   clearOrderModal,
   createOrder,
   selectConstructorItems,
@@ -41,7 +40,6 @@ export const BurgerConstructor = (): React.JSX.Element | null => {
 
   const closeOrderModal = (): void => {
     dispatch(clearOrderModal());
-    dispatch(clearConstructor());
   };
 
   const price = useMemo(

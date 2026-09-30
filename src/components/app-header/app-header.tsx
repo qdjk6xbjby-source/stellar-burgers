@@ -5,5 +5,5 @@ import { useSelector } from 'react-redux';
 export const AppHeader = (): React.JSX.Element => {
   const user = useSelector(selectUser);
 
-  return <AppHeaderUI userName={user?.name ?? ''} />;
+  return <AppHeaderUI userName={user?.name} />;
 };

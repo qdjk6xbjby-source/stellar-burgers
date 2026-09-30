@@ -81,5 +81,12 @@ export const OrderInfo = (): React.JSX.Element => {
     return <Preloader />;
   }
 
-  return <OrderInfoUI orderInfo={orderInfo} />;
+  return (
+    <>
+      <p className="text text_type_digits-default" style={{ textAlign: 'center' }}>
+        #{String(orderInfo.number).padStart(6, '0')}
+      </p>
+      <OrderInfoUI orderInfo={orderInfo} />
+    </>
+  );
 };

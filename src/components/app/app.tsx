@@ -26,7 +26,7 @@ import {
 import { Preloader } from '@ui';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 
 import type { AppDispatch } from '@services/store';
 
@@ -135,7 +135,7 @@ const App = (): React.JSX.Element => {
               path="/feed/:number"
               element={
                 <div className={styles.detailPageWrap}>
-                  <OrderDetailsPage />
+                  <OrderInfo />
                 </div>
               }
             />
@@ -144,7 +144,7 @@ const App = (): React.JSX.Element => {
               element={
                 <ProtectedRoute>
                   <div className={styles.detailPageWrap}>
-                    <OrderDetailsPage />
+                    <OrderInfo />
                   </div>
                 </ProtectedRoute>
               }
@@ -164,13 +164,19 @@ const App = (): React.JSX.Element => {
               />
               <Route
                 path="/feed/:number"
-                element={<OrderModal onClose={handleCloseModal} />}
+                element={
+                  <Modal onClose={handleCloseModal}>
+                    <OrderInfo />
+                  </Modal>
+                }
               />
               <Route
                 path="/profile/orders/:number"
                 element={
                   <ProtectedRoute>
-                    <OrderModal onClose={handleCloseModal} />
+                    <Modal onClose={handleCloseModal}>
+                      <OrderInfo />
+                    </Modal>
                   </ProtectedRoute>
                 }
               />
@@ -179,27 +185,6 @@ const App = (): React.JSX.Element => {
         </>
       )}
     </div>
-  );
-};
-
-const OrderModal = ({ onClose }: { onClose: () => void }): React.JSX.Element => {
-  const { number } = useParams<{ number: string }>();
-  return (
-    <Modal title={`#${String(number ?? '').padStart(6, '0')}`} onClose={onClose}>
-      <OrderInfo />
-    </Modal>
-  );
-};
-
-const OrderDetailsPage = (): React.JSX.Element => {
-  const { number } = useParams<{ number: string }>();
-  return (
-    <>
-      <p className={`text text_type_digits-default ${styles.detailHeader}`}>
-        #{String(number ?? '').padStart(6, '0')}
-      </p>
-      <OrderInfo />
-    </>
   );
 };
 
