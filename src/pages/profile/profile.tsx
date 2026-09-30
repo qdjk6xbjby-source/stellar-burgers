@@ -1,41 +1,44 @@
+﻿import { selectUser, updateUser } from '@slices';
 import { ProfileUI } from '@ui-pages';
-import { type SyntheticEvent, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+
+import type { AppDispatch } from '@services/store';
+import type { SyntheticEvent } from 'react';
 
 export const Profile = (): React.JSX.Element => {
-  /** TODO: Взять переменную из стора */
-  const user = {
-    name: '',
-    email: '',
-  };
+  const dispatch = useDispatch<AppDispatch>();
+  const user = useSelector(selectUser);
 
   const [formValue, setFormValue] = useState({
-    name: user.name,
-    email: user.email,
+    name: user?.name ?? '',
+    email: user?.email ?? '',
     password: '',
   });
 
   useEffect(() => {
-    setFormValue((prevState) => ({
-      ...prevState,
-      name: user?.name || '',
-      email: user?.email || '',
-    }));
+    setFormValue({
+      name: user?.name ?? '',
+      email: user?.email ?? '',
+      password: '',
+    });
   }, [user]);
 
   const isFormChanged =
-    formValue.name !== user?.name ||
-    formValue.email !== user?.email ||
+    formValue.name !== (user?.name ?? '') ||
+    formValue.email !== (user?.email ?? '') ||
     !!formValue.password;
 
   const handleSubmit = (e: SyntheticEvent): void => {
     e.preventDefault();
+    void dispatch(updateUser(formValue));
   };
 
   const handleCancel = (e: SyntheticEvent): void => {
     e.preventDefault();
     setFormValue({
-      name: user.name,
-      email: user.email,
+      name: user?.name ?? '',
+      email: user?.email ?? '',
       password: '',
     });
   };

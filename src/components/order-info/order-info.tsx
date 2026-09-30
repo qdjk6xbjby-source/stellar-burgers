@@ -1,26 +1,43 @@
-import { Preloader, OrderInfoUI } from '@ui';
-import { useMemo } from 'react';
+﻿import {
+  fetchOrderByNumber,
+  selectFeedOrders,
+  selectIngredients,
+  selectOrderByNumber,
+  selectUserOrders,
+} from '@slices';
+import { OrderInfoUI, Preloader } from '@ui';
+import { useEffect, useMemo } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
 
+import type { AppDispatch } from '@services/store';
 import type { TIngredient } from '@utils-types';
 
 export const OrderInfo = (): React.JSX.Element => {
-  /** TODO: взять переменные orderData и ingredients из стора */
-  const orderData = {
-    createdAt: '',
-    ingredients: [],
-    _id: '',
-    status: '',
-    name: '',
-    updatedAt: 'string',
-    number: 0,
-  };
+  const { number } = useParams<{ number: string }>();
+  const dispatch = useDispatch<AppDispatch>();
 
-  const ingredients: TIngredient[] = [];
+  const ingredients = useSelector(selectIngredients);
+  const feedOrders = useSelector(selectFeedOrders);
+  const userOrders = useSelector(selectUserOrders);
+  const orderByNumber = useSelector(selectOrderByNumber);
 
-  /**
-   * использование useMemo не обязательно
-   */
-  /* Готовим данные для отображения */
+  const orderNum = Number(number);
+
+  const orderData = useMemo(
+    () =>
+      feedOrders.find((order) => order.number === orderNum) ??
+      userOrders.find((order) => order.number === orderNum) ??
+      (orderByNumber?.number === orderNum ? orderByNumber : null),
+    [feedOrders, userOrders, orderByNumber, orderNum]
+  );
+
+  useEffect(() => {
+    if (!orderData && orderNum) {
+      void dispatch(fetchOrderByNumber(orderNum));
+    }
+  }, [orderData, orderNum, dispatch]);
+
   const orderInfo = useMemo(() => {
     if (!orderData || !ingredients.length) return null;
 
@@ -64,5 +81,12 @@ export const OrderInfo = (): React.JSX.Element => {
     return <Preloader />;
   }
 
-  return <OrderInfoUI orderInfo={orderInfo} />;
+  return (
+    <>
+      <p className="text text_type_digits-default" style={{ textAlign: 'center' }}>
+        #{String(orderInfo.number).padStart(6, '0')}
+      </p>
+      <OrderInfoUI orderInfo={orderInfo} />
+    </>
+  );
 };

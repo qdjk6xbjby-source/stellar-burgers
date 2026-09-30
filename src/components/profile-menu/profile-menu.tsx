@@ -1,11 +1,19 @@
+﻿import { logoutUser } from '@slices';
 import { ProfileMenuUI } from '@ui';
-import { useLocation } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { useLocation, useNavigate } from 'react-router-dom';
+
+import type { AppDispatch } from '@services/store';
 
 export const ProfileMenu = (): React.JSX.Element => {
   const { pathname } = useLocation();
+  const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
 
   const handleLogout = (): void => {
-    // TODO: Разлогинить пользователя
+    void dispatch(logoutUser()).then(() => {
+      void navigate('/login');
+    });
   };
 
   return <ProfileMenuUI handleLogout={handleLogout} pathname={pathname} />;
