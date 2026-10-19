@@ -42,33 +42,11 @@ const mockIngredients = [
   },
 ];
 
-const mockUser = {
-  success: true,
-  user: {
-    name: 'Тестовый Пользователь',
-    email: 'test@example.com',
-  },
-};
-
-const mockOrderResponse = {
-  success: true,
-  name: 'Краторный бургер',
-  order: {
-    number: 77777,
-  },
-};
-
 test.describe('Конструктор бургеров и оформление заказа', () => {
   test.beforeEach(async ({ page }) => {
-    await page.route('**/api/ingredients', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          success: true,
-          data: mockIngredients,
-        }),
-      });
+    await page.routeFromHAR('tests/fixtures/ingredients.har', {
+      url: '**/api/ingredients',
+      notFound: 'fallback',
     });
   });
 
@@ -101,19 +79,27 @@ test.describe('Конструктор бургеров и оформление �
   test('открытие и закрытие модального окна ингредиента', async ({ page }) => {
     await page.goto('/');
 
-    const bunCard = page.locator('li', { hasText: 'Краторная булка N-200i' });
-    await bunCard.locator('a').click();
+    const targetIngredient = mockIngredients[1];
+    const ingredientCard = page.locator('li', {
+      hasText: targetIngredient.name,
+    });
+    await ingredientCard.locator('a').click();
 
     const overlay = page.locator('[data-testid="modal-overlay"]');
+    const modal = page.locator('#modals');
+
     await expect(overlay).toBeVisible();
-    await expect(page.locator('#modals')).toContainText('Краторная булка N-200i');
-    await expect(page.locator('#modals')).toContainText('Калории, ккал');
+    await expect(modal).toContainText(targetIngredient.name);
+    await expect(modal).toContainText(targetIngredient.calories.toString());
+    await expect(modal).toContainText(targetIngredient.proteins.toString());
+    await expect(modal).toContainText(targetIngredient.fat.toString());
+    await expect(modal).toContainText(targetIngredient.carbohydrates.toString());
 
     const closeButton = page.locator('#modals button[aria-label="Закрыть"]');
     await closeButton.click();
     await expect(overlay).not.toBeVisible();
 
-    await bunCard.locator('a').click();
+    await ingredientCard.locator('a').click();
     await expect(overlay).toBeVisible();
 
     await overlay.click({ position: { x: 10, y: 10 } });
@@ -136,20 +122,14 @@ test.describe('Конструктор бургеров и оформление �
       localStorage.setItem('refreshToken', 'test-refresh-token');
     });
 
-    await page.route('**/api/auth/user', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify(mockUser),
-      });
+    await page.routeFromHAR('tests/fixtures/user.har', {
+      url: '**/api/auth/user',
+      notFound: 'fallback',
     });
 
-    await page.route('**/api/orders', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify(mockOrderResponse),
-      });
+    await page.routeFromHAR('tests/fixtures/order.har', {
+      url: '**/api/orders',
+      notFound: 'fallback',
     });
 
     await page.goto('/');
@@ -161,6 +141,16 @@ test.describe('Конструктор бургеров и оформление �
       hasText: 'Биокотлета из марсианской магнолии',
     });
     await mainCard.getByRole('button', { name: 'Добавить' }).click();
+
+    await expect(page.locator('[data-testid="constructor-bun-1"]')).toContainText(
+      'Краторная булка N-200i'
+    );
+    await expect(page.locator('[data-testid="constructor-bun-2"]')).toContainText(
+      'Краторная булка N-200i'
+    );
+    await expect(
+      page.locator('[data-testid="constructor-ingredients"]')
+    ).toContainText('Биокотлета из марсианской магнолии');
 
     const orderButton = page.getByRole('button', { name: 'Оформить заказ' });
     await orderButton.click();
