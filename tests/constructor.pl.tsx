@@ -1,4 +1,4 @@
-﻿import { expect, test } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 const mockIngredients = [
   {
@@ -90,10 +90,18 @@ test.describe('Конструктор бургеров и оформление �
 
     await expect(overlay).toBeVisible();
     await expect(modal).toContainText(targetIngredient.name);
-    await expect(modal).toContainText(targetIngredient.calories.toString());
-    await expect(modal).toContainText(targetIngredient.proteins.toString());
-    await expect(modal).toContainText(targetIngredient.fat.toString());
-    await expect(modal).toContainText(targetIngredient.carbohydrates.toString());
+    await expect(
+      modal.locator('li', { hasText: 'Калории, ккал' })
+    ).toContainText(targetIngredient.calories.toString());
+    await expect(
+      modal.locator('li', { hasText: 'Белки, г' })
+    ).toContainText(targetIngredient.proteins.toString());
+    await expect(
+      modal.locator('li', { hasText: 'Жиры, г' })
+    ).toContainText(targetIngredient.fat.toString());
+    await expect(
+      modal.locator('li', { hasText: 'Углеводы, г' })
+    ).toContainText(targetIngredient.carbohydrates.toString());
 
     const closeButton = page.locator('#modals button[aria-label="Закрыть"]');
     await closeButton.click();
